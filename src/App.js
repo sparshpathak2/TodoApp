@@ -1,154 +1,151 @@
-import ToDoList from "./Components/ToDoList";
-import { useEffect, useState, useRef } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-// import TextField from '@mui/material/TextField'
-import Paper from '@mui/material/Paper'
-import Grid from '@mui/material/Grid'
-import { styled } from '@mui/material/styles'
-import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
-import './App.css'
-import { border } from "@mui/system"
-import TextField from '@mui/material/TextField'
-import { brown } from "@mui/material/colors";
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import './App.css';
+import ToDoList from './Components/ToDoList';
+import { useRef, useState } from 'react';
+import { useEffect } from 'react';
+import Grid from '@mui/material/Grid';
+import CreatableSelect from 'react-select/creatable';
+import Select from 'react-select';
+const { v4: uuidv4 } = require('uuid');
 
 const LOCAL_STORAGE_KEY = 'todoApp.todos'
 
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
-
-// const mystyle = {
-//   width: 100%,
-//   font-size: 20px,
-//   padding: 20px,
-// }
-
-
 function App() {
+  const [todos, setTodos] = useState(() => {
+    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+  })
+  const [todoId, setTodoId] = useState([])
+  const [todoName, setTodoName] = useState([])
+  
 
-  // const [todos, setTodos] = useState([ {id : 1, name: 'todo 1', complete: false} ])
-  const [todos, setTodos] = useState([])
   const todoNameRef = useRef()
 
-  useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
-    if (storedTodos) setTodos(storedTodos)
-  }, [])
+  // useEffect(() => {
+  //   const storedTodos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+  //   if (storedTodos) setTodos(storedTodos)
+  // }, [])
 
-  useEffect(() => {
-    if (todos?.length) localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
+  console.log(todos)
 
-  function toggleTodo(id) {
-    // const newTodos = todos
-    const newTodos = [...todos]
-    const newTodo = newTodos.find(newTodo => newTodo.id === id)
-    newTodo.complete = !newTodo.complete
-    setTodos(newTodos)
-  }
-
-  function handleAddTodo(e) {
+  function addTodoHandler(e) {
+    e.preventDefault()
     const name = todoNameRef.current.value
+    console.log(name)
+    const prevTodos = [...todos]
     if (name === '')
       return
-    console.log(name)
-    setTodos(prevTodos => {
-      return [...prevTodos, { id: uuidv4(), name: name, complete: false }]
+    setTodos((prevTodos)=> {
+      return (
+        [...prevTodos, { id: uuidv4(), name: name, complete: false }]
+      )
     })
     todoNameRef.current.value = null
   }
 
-  function handleClearTodos() {
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
+  }, [todos])
+
+  const clearHandler = async () => {
     const newTodos = todos.filter(todo => !todo.complete)
     setTodos(newTodos)
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
   }
 
-  function handleTag() {
-
+  function toggleTodo(id) {
+    const tempTodos = [...todos]
+    const tempTodo = tempTodos.find(tempTodo => tempTodo.id === id)
+    tempTodo.complete = !tempTodo.complete
+    setTodos(tempTodos)
   }
-
-  // function handleOnChange(event) {
-  //   console.log("add to do")
-  //   setTodos(event.target.value)
-  // }
 
   return (
     <>
-      <Box sx={{
-        // text-align: left,
-        // background-color: antiquewhite,
-        bgcolor: 'yellow',
-        width: '50%',
-        // height: '200px',
-        p: '50px',
-        m: '20px auto',
-        borderRadius: 2,
+      <Box component="form" onSubmit={addTodoHandler} sx={{
+        display: 'flex',
+        width: '45%',
+        justifyContent: 'center',
+        p: '30px 50px',
+        m: '40px auto 20px',
+        flexDirection: "column",
         boxShadow: 2,
+        borderRadius: 2
       }}>
-        <div className="box-1">
-          {/* <input id="input-2" type="text" /> */}
-          <textarea ref={todoNameRef} className="todoTextarea" name="todoTextarea" id="textarea" cols="60" rows="5" placeholder="Jot down..."></textarea>
-          {/* <Box className="buttons" sx={{
+        {/* <input ref={todoNameRef} type="text" /> */}
+        <textarea id="textArea" ref={todoNameRef} type="text" rows="6"></textarea>
+        {/* <TextField
+          id="nameOfTodo"
+          // label="Multiline"
+          multiline
+          rows={4}
+          // defaultValue="Default Value"
+          // variant="filled"
+          onChange={todoOnChange}
+          // name="name"
+          sx={{
+            width: "100%",
+            m: "0px auto 20px"
+          }}
+        /> */}
+
+        <Box sx={{
+          display: 'flex',
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          // columnGap: 2,
+          rowGap: 2
+        }}>
+          {/* <CreatableSelect
+            isClearable
+            // onChange={tagsOnChange}
+            onChange={(value) => tagsOnChange('tags', value)}
+            options={tags}
+            value={tagValue}
+          // onInputChange={handleInputChange}
+          /> */}
+          <Box sx={{
             display: 'flex',
-            gap: 2,
-            // flexDirection: 'row'
-            // alignItems: 'flex-end',
-            // alignContent: 'flex-end',
-            justifyContent: 'flex-start'
+            flexWrap: "wrap",
+            columnGap: 2,
+            rowGap: 2,
+            mt: 2
           }}>
-          </Box> */}
-          <div className="buttons">
-            <span className="btnTag">
-              <Button onClick={handleTag}>Tag</Button>
-            </span>
-            <span className="btnAddtodo">
-              <Button variant="contained" onClick={handleAddTodo} sx={{
-                marginLeft: 1,
-                marginRight: 2
-              }}>TO DO</Button>
-              <Button variant="outlined" onClick={handleClearTodos}>CLEAR COMPLETE</Button>
-            </span>
-          </div>
-          {/* <button className="btn-primary" id="btnTodo" onClick={handleAddTodo}>TO DO</button> */}
-          {/* <button className="btn-primary" id="btnClear" onClick={handleClearTodos}>CLEAR COMPLETE</button> */}
-        </div>
+            {/* <Button type="submit" variant="contained" onClick={addTodoHandler}>Add Todo</Button> */}
+            <Button type="submit" variant="contained" >Add Todo</Button>
+            <Button variant="outlined" onClick={clearHandler}>Clear</Button>
+          </Box>
+        </Box>
       </Box>
-      {/* <div className="todoInputContainer">
+      <Container sx={{
+        width: '75%',
+        mb: 5
+      }}>
+        <Box sx={{
+          pt: 2,
+          pb: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span className='tdCount'>
+            {todos.filter(todo => !todo.complete).length} left
+          </span>
+          <span className='tdFilter'>
+            {/* <Select></Select> */}
+          </span>
+        </Box>
 
-      </div> */}
-      {/* <div className="todoListBox">
-          
-        </div> */}
-      <div className="box-main">
-
-        <div className="box-2">
-          <br />
-          <div className="todoNumber">{todos.filter(todo => !todo.complete).length} left</div>
-          {/* <hr /> */}
-          <div className="todoBox">
-            <ToDoList className="todolist" todos={todos} toggleTodo={toggleTodo} />
-          </div>
-        </div>
-      </div>
-
-
-      {/* <div className="container2">
-        <div className="item item-1">item-1</div>
-        <div className="item item-2">item-2</div>
-        <div className="item item-3">item-3</div>
-      </div> */}
-
-
+        <Grid container sx={{
+          rowGap: 5,
+        }}>
+          <ToDoList todos={todos} toggleTodo={toggleTodo} clearHandler={clearHandler} todoId={todoId} setTodoId={setTodoId} />
+        </Grid>
+      </Container>
     </>
-  )
+  );
 }
 
 export default App;
